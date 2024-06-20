@@ -283,7 +283,8 @@ export default class ResponsiveReactGridLayout extends React.Component<
         this.props.children,
         newCols,
         compactType,
-        this.props.allowOverlap
+        this.props.allowOverlap,
+        Infinity
       );
 
       // Store the new layout.
