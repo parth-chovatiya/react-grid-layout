@@ -384,8 +384,6 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       ? layout
       : compact(layout, compactType(this.props), cols, allowOverlap, maxRows);
 
-    this.props.onDragStop(newLayout, oldDragItem, l, null, e, node);
-
     // const { oldLayout } = this.state;
     this.setState({
       activeDrag: null,
@@ -394,7 +392,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       oldLayout: null
     });
 
-    if (newLayout) this.onLayoutMaybeChanged(newLayout, oldLayout);
+    if (newLayout) {
+      this.props.onDragStop(newLayout, oldDragItem, l, null, e, node);
+      this.onLayoutMaybeChanged(newLayout, oldLayout);
+    }
   };
 
   onLayoutMaybeChanged(newLayout: Layout, oldLayout: ?Layout) {
@@ -566,8 +567,6 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       ? layout
       : compact(layout, compactType(this.props), cols, allowOverlap, maxRows);
 
-    this.props.onResizeStop(newLayout, oldResizeItem, l, null, e, node);
-
     // const { oldLayout } = this.state;
     this.setState({
       activeDrag: null,
@@ -577,7 +576,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       resizing: false
     });
 
-    if (newLayout) this.onLayoutMaybeChanged(newLayout, oldLayout);
+    if (newLayout) {
+      this.props.onResizeStop(newLayout, oldResizeItem, l, null, e, node);
+      this.onLayoutMaybeChanged(newLayout, oldLayout);
+    }
   };
 
   /**
