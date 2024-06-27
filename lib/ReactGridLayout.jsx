@@ -15,7 +15,8 @@ import {
   moveElement,
   noop,
   synchronizeLayoutWithChildren,
-  withLayoutItem
+  withLayoutItem,
+  cloneLayout
 } from "./utils";
 
 import { calcXY } from "./calculateUtils";
@@ -179,6 +180,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         nextProps.cols,
         compactType(nextProps),
         nextProps.allowOverlap
+        // don't send maxRows because we don't want to stop first layout (on mount)
+        // nextProps.maxRows
       );
 
       return {
@@ -276,7 +279,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   ) => {
     const { oldDragItem } = this.state;
     let { layout } = this.state;
-    const { cols, allowOverlap, preventCollision } = this.props;
+    const { cols, allowOverlap, preventCollision, maxRows } = this.props;
     const l = getLayoutItem(layout, i);
     if (!l) return;
 
@@ -289,6 +292,9 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       placeholder: true,
       i: i
     };
+
+    // clone layout before anything is modified (see the PR for more details)
+    const oldLayoutClone = cloneLayout(layout);
 
     // Move the element to the dragged location.
     const isUserAction = true;
@@ -306,10 +312,19 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
     this.props.onDrag(layout, oldDragItem, l, placeholder, e, node);
 
+    let compactedLayout = compact(
+      layout,
+      compactType(this.props),
+      cols,
+      undefined,
+      maxRows
+    );
+
+    // revert to original layout if any item goes out of bounds
+    compactedLayout = compactedLayout || oldLayoutClone;
+
     this.setState({
-      layout: allowOverlap
-        ? layout
-        : compact(layout, compactType(this.props), cols),
+      layout: allowOverlap ? layout : compactedLayout,
       activeDrag: placeholder
     });
   };
@@ -332,9 +347,11 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
     const { oldDragItem } = this.state;
     let { layout } = this.state;
-    const { cols, preventCollision, allowOverlap } = this.props;
+    const { cols, preventCollision, allowOverlap, maxRows } = this.props;
     const l = getLayoutItem(layout, i);
     if (!l) return;
+
+    const oldLayoutClone = cloneLayout(layout);
 
     // Move the element here
     const isUserAction = true;
@@ -350,10 +367,19 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       allowOverlap
     );
 
+    let compactedLayout = compact(
+      layout,
+      compactType(this.props),
+      cols,
+      undefined,
+      maxRows
+    );
+
+    // revert to original layout if any item goes out of bounds
+    compactedLayout = compactedLayout || oldLayoutClone;
+
     // Set state
-    const newLayout = allowOverlap
-      ? layout
-      : compact(layout, compactType(this.props), cols);
+    const newLayout = allowOverlap ? layout : compactedLayout;
 
     this.props.onDragStop(newLayout, oldDragItem, l, null, e, node);
 
@@ -402,8 +428,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     { e, node, size, handle }
   ) => {
     const { oldResizeItem } = this.state;
-    let { layout } = this.state;
-    const { cols, preventCollision, allowOverlap } = this.props;
+    const { layout } = this.state;
+    const { cols, preventCollision, allowOverlap, maxRows } = this.props;
+
+    const oldLayoutClone = cloneLayout(layout);
 
     let shouldMoveItem = false;
     let finalLayout;
@@ -491,11 +519,20 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
     this.props.onResize(finalLayout, oldResizeItem, l, placeholder, e, node);
 
+    let compactedLayout = compact(
+      finalLayout,
+      compactType(this.props),
+      cols,
+      undefined,
+      maxRows
+    );
+
+    // revert to original layout if any item goes out of bounds
+    compactedLayout = compactedLayout || oldLayoutClone;
+
     // Re-compact the newLayout and set the drag placeholder.
     this.setState({
-      layout: allowOverlap
-        ? finalLayout
-        : compact(finalLayout, compactType(this.props), cols),
+      layout: allowOverlap ? finalLayout : compactedLayout,
       activeDrag: placeholder
     });
   };
@@ -507,13 +544,24 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     { e, node }
   ) => {
     const { layout, oldResizeItem } = this.state;
-    const { cols, allowOverlap } = this.props;
+    const { cols, allowOverlap, maxRows } = this.props;
     const l = getLayoutItem(layout, i);
 
+    const oldLayoutClone = cloneLayout(layout);
+
+    let compactedLayout = compact(
+      layout,
+      compactType(this.props),
+      cols,
+      undefined,
+      maxRows
+    );
+
+    // revert to original layout if any item goes out of bounds
+    compactedLayout = compactedLayout || oldLayoutClone;
+
     // Set state
-    const newLayout = allowOverlap
-      ? layout
-      : compact(layout, compactType(this.props), cols);
+    const newLayout = allowOverlap ? layout : compactedLayout;
 
     this.props.onResizeStop(newLayout, oldResizeItem, l, null, e, node);
 
@@ -753,18 +801,21 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   };
 
   removeDroppingPlaceholder: () => void = () => {
-    const { droppingItem, cols } = this.props;
+    const { droppingItem, cols, allowOverlap, maxRows } = this.props;
     const { layout } = this.state;
+
+    const oldLayoutClone = cloneLayout(layout);
 
     const newLayout = compact(
       layout.filter(l => l.i !== droppingItem.i),
       compactType(this.props),
       cols,
-      this.props.allowOverlap
+      allowOverlap,
+      maxRows
     );
 
     this.setState({
-      layout: newLayout,
+      layout: newLayout || oldLayoutClone,
       droppingDOMNode: null,
       activeDrag: null,
       droppingPosition: undefined
