@@ -128,7 +128,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       this.props.cols,
       // Legacy support for verticalCompact: false
       compactType(this.props),
-      this.props.allowOverlap
+      this.props.allowOverlap,
+      this.props.maxProps,
     ),
     mounted: false,
     oldDragItem: null,
@@ -172,6 +173,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       newLayoutBase = prevState.layout;
     }
 
+    const oldLayoutClone = cloneLayout(prevState.layout);
+
     // We need to regenerate the layout.
     if (newLayoutBase) {
       const newLayout = synchronizeLayoutWithChildren(
@@ -179,13 +182,13 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         nextProps.children,
         nextProps.cols,
         compactType(nextProps),
-        nextProps.allowOverlap
+        nextProps.allowOverlap,
         // don't send maxRows because we don't want to stop first layout (on mount)
-        // nextProps.maxRows
+        nextProps.maxRows
       );
 
       return {
-        layout: newLayout,
+        layout: newLayout || oldLayoutClone,
         // We need to save these props to state for using
         // getDerivedStateFromProps instead of componentDidMount (in which we would get extra rerender)
         compactType: nextProps.compactType,
@@ -351,7 +354,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     const l = getLayoutItem(layout, i);
     if (!l) return;
 
-    const oldLayoutClone = cloneLayout(layout);
+    const { oldLayout } = this.state;
+    const oldLayoutClone = cloneLayout(oldLayout);
 
     // Move the element here
     const isUserAction = true;
@@ -383,7 +387,6 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
     this.props.onDragStop(newLayout, oldDragItem, l, null, e, node);
 
-    const { oldLayout } = this.state;
     this.setState({
       activeDrag: null,
       layout: newLayout,
@@ -547,7 +550,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     const { cols, allowOverlap, maxRows } = this.props;
     const l = getLayoutItem(layout, i);
 
-    const oldLayoutClone = cloneLayout(layout);
+    const { oldLayout } = this.state;
+    const oldLayoutClone = cloneLayout(oldLayout);
 
     let compactedLayout = compact(
       layout,
@@ -565,7 +569,6 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
     this.props.onResizeStop(newLayout, oldResizeItem, l, null, e, node);
 
-    const { oldLayout } = this.state;
     this.setState({
       activeDrag: null,
       layout: newLayout,
