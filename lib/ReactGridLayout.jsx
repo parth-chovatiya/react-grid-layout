@@ -129,7 +129,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       // Legacy support for verticalCompact: false
       compactType(this.props),
       this.props.allowOverlap,
-      this.props.maxProps,
+      this.props.maxProps
     ),
     mounted: false,
     oldDragItem: null,
@@ -849,14 +849,26 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   onDrop: EventHandler = (e: Event) => {
     e.preventDefault(); // Prevent any browser native action
     e.stopPropagation();
-    const { droppingItem } = this.props;
+    const { droppingItem, cols, allowOverlap, maxRows } = this.props;
     const { layout } = this.state;
     const item = layout.find(l => l.i === droppingItem.i);
+
+    const compactedLayout = compact(
+      [...layout, item],
+      compactType(this.props),
+      cols,
+      allowOverlap,
+      maxRows
+    );
 
     // reset dragEnter counter on drop
     this.dragEnterCounter = 0;
 
     this.removeDroppingPlaceholder();
+
+    if (!compactedLayout) {
+      return;
+    }
 
     this.props.onDrop(layout, item, e);
   };
