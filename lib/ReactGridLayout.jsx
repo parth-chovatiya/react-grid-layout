@@ -399,9 +399,20 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
   onLayoutMaybeChanged(newLayout: Layout, oldLayout: ?Layout) {
     if (!oldLayout) oldLayout = this.state.layout;
+    const { cols, allowOverlap, maxRows } = this.props;
+
+    const newCompactedLayout = compact(
+      cloneLayout(newLayout),
+      compactType(this.props),
+      cols,
+      allowOverlap,
+      maxRows
+    );
+
+    if (!newCompactedLayout) return;
 
     if (!deepEqual(oldLayout, newLayout)) {
-      this.props.onLayoutChange(newLayout);
+      this.props.onLayoutChange(newLayout, oldLayout);
     }
   }
 
@@ -430,11 +441,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     h,
     { e, node, size, handle }
   ) => {
-    const { oldResizeItem } = this.state;
-    const { layout } = this.state;
+    const { oldResizeItem, layout, oldLayout } = this.state;
     const { cols, preventCollision, allowOverlap, maxRows } = this.props;
 
-    const oldLayoutClone = cloneLayout(layout);
+    const oldLayoutClone = cloneLayout(oldLayout);
 
     let shouldMoveItem = false;
     let finalLayout;
@@ -805,9 +815,9 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
   removeDroppingPlaceholder: () => void = () => {
     const { droppingItem, cols, allowOverlap, maxRows } = this.props;
-    const { layout } = this.state;
+    const { layout, oldLayout } = this.state;
 
-    const oldLayoutClone = cloneLayout(layout);
+    const oldLayoutClone = cloneLayout(oldLayout);
 
     const newLayout = compact(
       layout.filter(l => l.i !== droppingItem.i),
@@ -854,7 +864,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     const item = layout.find(l => l.i === droppingItem.i);
 
     const compactedLayout = compact(
-      [...layout, item],
+      cloneLayout(layout),
       compactType(this.props),
       cols,
       allowOverlap,
