@@ -293,7 +293,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       x: l.x,
       y: l.y,
       placeholder: true,
-      i: i
+      i: i,
+      heightResizeMultiplier: l.heightResizeMultiplier,
+      widthResizeMultiplier: l.widthResizeMultiplier,
+      resizeRatio: l.resizeRatio
     };
 
     // clone layout before anything is modified (see the PR for more details)
@@ -710,6 +713,9 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         x={l.x}
         y={l.y}
         i={l.i}
+        widthResizeMultiplier={l.widthResizeMultiplier}
+        heightResizeMultiplier={l.heightResizeMultiplier}
+        resizeRatio={l.resizeRatio}
         minH={l.minH}
         minW={l.minW}
         maxH={l.maxH}
