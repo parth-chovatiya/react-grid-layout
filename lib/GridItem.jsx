@@ -593,7 +593,10 @@ export default class GridItem extends React.Component<Props, State> {
       containerWidth,
       heightResizeMultiplier,
       widthResizeMultiplier,
-      resizeRatio
+      resizeRatio,
+      cols,
+      w: oldW,
+      h: oldH
     } = this.props;
     const { minW, maxW } = this.props;
 
@@ -629,7 +632,21 @@ export default class GridItem extends React.Component<Props, State> {
     w = clamp(w, Math.max(minW, 1), maxW);
     h = clamp(h, minH, maxH);
 
-    handler.call(this, i, w, h, { e, node, size: updatedSize, handle });
+    if (x + w <= cols) {
+      handler.call(this, i, w, h, {
+        e,
+        node,
+        size: updatedSize,
+        handle
+      });
+    } else {
+      handler.call(this, i, oldW, oldH, {
+        e,
+        node,
+        size: updatedSize,
+        handle
+      });
+    }
   }
 
   render(): ReactNode {

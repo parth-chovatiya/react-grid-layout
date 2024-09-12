@@ -117,7 +117,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     onResize: noop,
     onResizeStop: noop,
     onDrop: noop,
-    onDropDragOver: noop
+    onDropDragOver: noop,
+    onForceReRender: noop
   };
 
   state: State = {
@@ -382,6 +383,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       maxRows
     );
 
+    if (!compactedLayout) {
+      this.props.onForceReRender();
+    }
+
     // revert to original layout if any item goes out of bounds
     compactedLayout = compactedLayout || oldLayoutClone;
 
@@ -573,6 +578,11 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       undefined,
       maxRows
     );
+
+    if (!compactedLayout) {
+      this.props.onForceReRender();
+      return;
+    }
 
     // revert to original layout if any item goes out of bounds
     compactedLayout = compactedLayout || oldLayoutClone;
@@ -883,6 +893,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     this.removeDroppingPlaceholder();
 
     if (!compactedLayout) {
+      this.props.onForceReRender();
       return;
     }
 

@@ -157,7 +157,10 @@ export default class ResponsiveReactGridLayout extends React.Component<
     onLayoutChange: PropTypes.func,
 
     // Calls back with (containerWidth, margin, cols, containerPadding)
-    onWidthChange: PropTypes.func
+    onWidthChange: PropTypes.func,
+
+    // To force re-render
+    onForceReRender: PropTypes.func
   };
 
   static defaultProps: DefaultProps = {
