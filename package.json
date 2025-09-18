@@ -1,6 +1,6 @@
 {
   "name": "react-grid-layout-sp",
-  "version": "1.4.17",
+  "version": "1.4.18",
   "description": "A draggable and resizable grid layout with responsive breakpoints, for React.",
   "main": "index.js",
   "scripts": {
@@ -13,12 +13,12 @@
     "prepublishOnly": "make build",
     "validate": "npm ls",
     "flow": "flow",
-    "fmt": "prettier --write ./**.{json,js,yml,md}",
+    "fmt": "prettier --wriete ./**.{json,js,yml,md}",
     "fmt:check": "prettier --check ./**.{json,js,yml,md}"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:STRML/react-grid-layout.git"
+    "url": "git@github.com:parth-chovatiya/react-grid-layout.git"
   },
   "keywords": [
     "react",
@@ -33,9 +33,9 @@
   "author": "Samuel Reed <samuel.trace.reed@gmail.com> (http://strml.net/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/STRML/react-grid-layout/issues"
+    "url": "https://github.com/parth-chovatiya/react-grid-layout/issues"
   },
-  "homepage": "https://github.com/STRML/react-grid-layout",
+  "homepage": "https://github.com/parth-chovatiya/react-grid-layout",
   "dependencies": {
     "clsx": "^2.0.0",
     "fast-equals": "^4.0.3",
