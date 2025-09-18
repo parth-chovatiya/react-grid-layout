@@ -780,11 +780,17 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     const finalDroppingItem = { ...droppingItem, ...onDragOverResult };
 
     const { layout } = this.state;
-    // This is relative to the DOM element that this event fired for.
-    const { layerX, layerY } = e.nativeEvent;
+    // Compute pointer position relative to the layout container (stable across targets)
+    const containerRect = e.currentTarget.getBoundingClientRect();
+    const scrollLeft = e.currentTarget.scrollLeft || 0;
+    const scrollTop = e.currentTarget.scrollTop || 0;
+    const pointerLeft =
+      (e.clientX - containerRect.left + scrollLeft) / transformScale;
+    const pointerTop =
+      (e.clientY - containerRect.top + scrollTop) / transformScale;
     const droppingPosition = {
-      left: layerX / transformScale,
-      top: layerY / transformScale,
+      left: pointerLeft,
+      top: pointerTop,
       e
     };
 
@@ -800,8 +806,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
       const calculatedPosition = calcXY(
         positionParams,
-        layerY,
-        layerX,
+        pointerTop,
+        pointerLeft,
         finalDroppingItem.w,
         finalDroppingItem.h
       );
@@ -822,7 +828,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       });
     } else if (this.state.droppingPosition) {
       const { left, top } = this.state.droppingPosition;
-      const shouldUpdatePosition = left != layerX || top != layerY;
+      const shouldUpdatePosition = left != pointerLeft || top != pointerTop;
       if (shouldUpdatePosition) {
         this.setState({ droppingPosition });
       }
